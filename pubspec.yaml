@@ -1,4 +1,4 @@
-name: sample_pubspec
+name: pewpew
 description: A sample application
 dependencies:
   browser: any
