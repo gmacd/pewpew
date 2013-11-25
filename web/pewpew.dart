@@ -1,12 +1,17 @@
 library pewpewgame;
 
 import 'dart:html';
+import 'dart:math';
 import 'package:game_loop/game_loop_html.dart';
 import 'package:pewpew/gamewrapper.dart';
 
 
+const int sceneLeft = 10;
+const int sceneRight = 500;
+
 const int numRows = 5;
 const int numCols = 11;
+
 
 List<Invader> invaders = new List<Invader>();
 
@@ -15,9 +20,9 @@ main() {
 }
 
 init() {
-  entities.add(new Ship(100, 100));
+  entities.add(new Ship(100, 250));
 
-  int invaderStartX = 20;
+  int invaderStartX = sceneLeft + 10;
   int invaderStartY = 40;
   int invaderGapX = 30;
   int invaderGapY = 35;
@@ -39,16 +44,18 @@ class Ship extends Entity {
   Texture _tex;
   int _x, _y;
 
+  int _delta = 2;
+
   Ship(this._x, this._y) {
     _tex = textures.add(#player, "sprites.png", 16, 0, 16, 16);
   }
 
   update(UpdateContext u) {
     if (u.gameLoop.keyboard.isDown(Keyboard.LEFT)) {
-      _x -= 1;
+      _x = max(sceneLeft, _x - _delta);
     }
     else if (u.gameLoop.keyboard.isDown(Keyboard.RIGHT)) {
-      _x += 1;
+      _x = min(sceneRight, _x + _delta);
     }
   }
 
@@ -79,14 +86,26 @@ class InvaderController extends Entity {
   InvaderController(this._invaders);
 
   int _updateIdx = 0;
+  int delta = 2;
 
   update(UpdateContext u) {
-    int row = _updateIdx % numRows;
-    int firstInvader = row * numCols;
-    int lastInvader = firstInvader + numCols;
+    //int row = _updateIdx % numRows;
+    //int firstInvader = row * numCols;
+    //int lastInvader = firstInvader + numCols;
+    int firstInvader = 0;
+    int lastInvader = _invaders.length;
+
+    int minX = sceneRight;
+    int maxX = sceneLeft;
     for (int i = firstInvader; i < lastInvader; i++) {
-      _invaders[i].x += 1;
+      Invader invader = _invaders[i];
+      invader.x += delta;
+      minX = min(minX, invader.x);
+      maxX = max(maxX, invader.x + 16);
     }
+
+    if ((minX <= sceneLeft) || (maxX >= sceneRight))
+      delta *= -1;
 
     _updateIdx++;
   }
