@@ -63,7 +63,8 @@ class Ship extends Entity {
     }
 
     if (u.gameLoop.keyboard.released(Keyboard.SPACE)) {
-      _bulletPool.fire(_x, _y, -1);
+      const int bulletInitialOffsetY = -6;
+      _bulletPool.fire(_x, _y + bulletInitialOffsetY, -1);
     }
   }
 
