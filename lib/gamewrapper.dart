@@ -5,9 +5,10 @@ import 'package:game_loop/game_loop_html.dart';
 
 
 TextureManager textures = new TextureManager();
-List<Entity> entities = new List<Entity>();
+Entities entities = new Entities();
 
 typedef void InitFunc();
+
 
 initGameWrapper(Element gameContainer, InitFunc init) {
   CanvasElement canvas = new CanvasElement(width: 640, height: 480);
@@ -28,13 +29,13 @@ initGameWrapper(Element gameContainer, InitFunc init) {
 }
 
 update(UpdateContext u) {
-  entities.forEach((e) => e.update(u));
+  entities.all.forEach((e) => e.update(u));
 }
 
 render(RenderContext r) {
   r.ctx.setFillColorRgb(0, 0, 0, 255);
   r.ctx.fillRect(0, 0, r.w, r.h);
-  entities.forEach((e) => e.render(r));
+  entities.all.forEach((e) => e.render(r));
 }
 
 
@@ -92,4 +93,13 @@ class TextureManager {
 class Entity {
   update(UpdateContext u) {}
   render(RenderContext r) {}
+}
+
+
+class Entities {
+  List<Entity> _entities = new List<Entity>();
+
+  void add(Entity e) => _entities.add(e);
+  Iterable<Entity> get all => _entities;
+  Iterable<Entity> getOfType(Type t) => _entities.where((e) => e.runtimeType == t);
 }
