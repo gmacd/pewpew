@@ -21,7 +21,7 @@ main() {
 
 init() {
   entities.add(new BulletPool());
-  entities.add(new Ship(100, 250));
+  entities.add(new Player(100, 300));
 
   int invaderStartX = sceneLeft + 10;
   int invaderStartY = 40;
@@ -41,15 +41,18 @@ init() {
 }
 
 
-class Ship extends Entity {
+class Player extends Entity {
   Texture _tex;
   int _x, _y;
 
   int _delta = 2;
 
   BulletPool _bulletPool;
+  double _lastShotTime = 0.0;
+  double _minRepeatHeldShotInterval = 0.4;
+  double _minRepeatSingleShotInterval = 0.1;
 
-  Ship(this._x, this._y) {
+  Player(this._x, this._y) {
     _tex = textures.add(#player, "sprites.png", 16, 0, 16, 16);
     _bulletPool = entities.getOfType(BulletPool).single;
   }
@@ -62,9 +65,15 @@ class Ship extends Entity {
       _x = min(sceneRight, _x + _delta);
     }
 
-    if (u.gameLoop.keyboard.released(Keyboard.SPACE)) {
+    // Allow rapid single shots or slower repeat shots
+    bool repeatShot = u.gameLoop.keyboard.isDown(Keyboard.SPACE)
+                      && (u.gameLoop.gameTime > (_lastShotTime + _minRepeatHeldShotInterval));
+    bool singleShot = u.gameLoop.keyboard.released(Keyboard.SPACE)
+                      && (u.gameLoop.gameTime > (_lastShotTime + _minRepeatSingleShotInterval));
+    if (repeatShot || singleShot) {
       const int bulletInitialOffsetY = -6;
-      _bulletPool.fire(_x, _y + bulletInitialOffsetY, -1);
+      _bulletPool.fire(_x, _y + bulletInitialOffsetY, -1, Bullet.Player);
+      _lastShotTime = u.gameLoop.gameTime;
     }
   }
 
@@ -114,15 +123,22 @@ class InvaderController extends Entity {
   }
 }
 
+
 class Bullet {
   bool _active = false;
   int x, y;
   int deltaY;
 
-  activate(int x, int y, int deltaY) {
+  static const Unknown = -1;
+  static const Player = 0;
+  static const Enemy = 1;
+  int bulletType = Unknown;
+
+  activate(int x, int y, int deltaY, int bulletType) {
     this.x = x;
     this.y = y;
     this.deltaY = deltaY;
+    this.bulletType = bulletType;
     _active = true;
   }
 
@@ -133,6 +149,7 @@ class Bullet {
   bool get active => _active;
 }
 
+
 class BulletPool extends Entity {
   List<Bullet> _bullets;
   int _lastUsed = -1;
@@ -141,7 +158,7 @@ class BulletPool extends Entity {
 
   BulletPool() {
     _bulletTex = textures.add(#bullet, "sprites.png", 32, 0, 16, 16);
-    _bullets = new List<Bullet>.generate(1000, (i) => new Bullet());
+    _bullets = new List<Bullet>.generate(1000, (_) => new Bullet());
   }
 
   update(UpdateContext u) {
@@ -158,11 +175,16 @@ class BulletPool extends Entity {
     }
   }
 
-  fire(int x, int y, int deltaY) {
-    _lastUsed++;
-    if (_lastUsed >= _bullets.length)
-      _lastUsed = 0;
+  fire(int x, int y, int deltaY, int bulletType) {
+    for (int i = 0; i < _bullets.length; i++) {
+      _lastUsed++;
+      if (_lastUsed >= _bullets.length)
+        _lastUsed = 0;
 
-    _bullets[_lastUsed].activate(x, y, deltaY);
+      if (!_bullets[_lastUsed].active) {
+        _bullets[_lastUsed].activate(x, y, deltaY, bulletType);
+        break;
+      }
+    }
   }
 }

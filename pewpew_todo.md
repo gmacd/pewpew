@@ -2,7 +2,6 @@
 
 - Collision
 - Sound effects
-- Hold down fire
 - Destructable barriers
 - Score
 - Death
@@ -11,3 +10,6 @@
 - Saucer
 - Exploding shrapnel
 
+### Done
+
+- Hold down fire
