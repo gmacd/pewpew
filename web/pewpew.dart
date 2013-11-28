@@ -6,8 +6,8 @@ import 'package:game_loop/game_loop_html.dart';
 import 'package:pewpew/gamewrapper.dart';
 
 
-const int sceneLeft = 10;
-const int sceneRight = 500;
+const double sceneLeft = 10.0;
+const double sceneRight = 400.0;
 
 const int numRows = 5;
 const int numCols = 11;
@@ -21,14 +21,16 @@ main() {
 
 init() {
   entities.add(new BulletPool());
-  entities.add(new Player(100, 300));
 
-  int invaderStartX = sceneLeft + 10;
-  int invaderStartY = 40;
-  int invaderGapX = 30;
-  int invaderGapY = 35;
-  for (int y = 0; y < numRows; y++) {
-    for (int x = 0; x < numCols; x++) {
+  double midX = ((sceneRight - sceneLeft) / 2.0) + sceneLeft;
+  entities.add(new Player(midX, 300.0));
+
+  double invaderStartX = sceneLeft + 20;
+  double invaderStartY = 40.0;
+  double invaderGapX = 30.0;
+  double invaderGapY = 35.0;
+  for (double y = 0.0; y < numRows; y++) {
+    for (double x = 0.0; x < numCols; x++) {
       Invader invader = new Invader(
           invaderStartX + invaderGapX * x,
           invaderStartY + invaderGapY * y);
@@ -43,9 +45,9 @@ init() {
 
 class Player extends Entity {
   Texture _tex;
-  int _x, _y;
+  double _x, _y;
 
-  int _delta = 2;
+  double _delta = 2.0;
 
   BulletPool _bulletPool;
   double _lastShotTime = 0.0;
@@ -71,8 +73,8 @@ class Player extends Entity {
     bool singleShot = u.gameLoop.keyboard.released(Keyboard.SPACE)
                       && (u.gameLoop.gameTime > (_lastShotTime + _minRepeatSingleShotInterval));
     if (repeatShot || singleShot) {
-      const int bulletInitialOffsetY = -6;
-      _bulletPool.fire(_x, _y + bulletInitialOffsetY, -1, Bullet.Player);
+      const double bulletInitialOffsetY = -6.0;
+      _bulletPool.fire(_x, _y + bulletInitialOffsetY, -1.0, Bullet.Player);
       _lastShotTime = u.gameLoop.gameTime;
     }
   }
@@ -85,7 +87,7 @@ class Player extends Entity {
 
 class Invader extends Entity {
   Texture _tex;
-  int x, y;
+  double x, y;
 
   Invader(this.x, this.y) {
     _tex = textures.add(#invader, "sprites.png", 0, 0, 16, 16);
@@ -101,14 +103,14 @@ class InvaderController extends Entity {
   InvaderController(this._invaders);
 
   int _updateIdx = 0;
-  int delta = 2;
+  double delta = 0.7;
 
   update(UpdateContext u) {
     int firstInvader = 0;
     int lastInvader = _invaders.length;
 
-    int minX = sceneRight;
-    int maxX = sceneLeft;
+    double minX = sceneRight;
+    double maxX = sceneLeft;
     for (int i = firstInvader; i < lastInvader; i++) {
       Invader invader = _invaders[i];
       invader.x += delta;
@@ -117,7 +119,7 @@ class InvaderController extends Entity {
     }
 
     if ((minX <= sceneLeft) || (maxX >= sceneRight))
-      delta *= -1;
+      delta *= -1.0;
 
     _updateIdx++;
   }
@@ -126,15 +128,15 @@ class InvaderController extends Entity {
 
 class Bullet {
   bool _active = false;
-  int x, y;
-  int deltaY;
+  double x, y;
+  double deltaY;
 
   static const Unknown = -1;
   static const Player = 0;
   static const Enemy = 1;
   int bulletType = Unknown;
 
-  activate(int x, int y, int deltaY, int bulletType) {
+  activate(double x, double y, double deltaY, int bulletType) {
     this.x = x;
     this.y = y;
     this.deltaY = deltaY;
@@ -175,7 +177,7 @@ class BulletPool extends Entity {
     }
   }
 
-  fire(int x, int y, int deltaY, int bulletType) {
+  fire(double x, double y, double deltaY, int bulletType) {
     for (int i = 0; i < _bullets.length; i++) {
       _lastUsed++;
       if (_lastUsed >= _bullets.length)

@@ -67,7 +67,7 @@ class Texture {
   int _tx, _ty, _tw, _th;
   Texture(this._tex, this._tx, this._ty, this._tw, this._th);
 
-  draw(RenderContext r, int x, int y) {
+  draw(RenderContext r, double x, double y) {
     r.ctx.drawImageScaledFromSource(
         _tex, _tx, _ty, _tw, _tw,
         x, y, _tw, _th);
